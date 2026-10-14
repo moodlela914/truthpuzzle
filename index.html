@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>媒體識讀：真相迷宮</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+            overflow-x: hidden;
+            line-height: 1.7;
+        }
+        /* 增強背景環境光的鮮豔度 */
+        .adventure-bg {
+            background: radial-gradient(circle at 15% 50%, rgba(56, 189, 248, 0.15), transparent 45%),
+                        radial-gradient(circle at 85% 30%, rgba(251, 191, 36, 0.15), transparent 45%),
+                        linear-gradient(rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 1));
+            background-attachment: fixed;
+        }
+        /* 卡片發光與高對比質感 */
+        .card-box {
+            background-color: rgba(30, 41, 59, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        .card-box:hover {
+            border-color: rgba(251, 191, 36, 0.6);
+            transform: translateY(-4px);
+            box-shadow: 0 15px 35px -10px rgba(251, 191, 36, 0.25);
+        }
+        /* 按鈕高亮互動效果 */
+        .game-button {
+            transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+        .game-button:hover {
+            background-color: rgba(251, 191, 36, 0.15);
+            border-color: rgba(251, 191, 36, 0.8);
+            transform: translateX(10px);
+            box-shadow: -5px 5px 15px rgba(251, 191, 36, 0.1);
+        }
+        .game-button:active {
+            transform: scale(0.98) translateX(5px);
+        }
+        /* 動畫重置用類別 */
+        .scene-entry {
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .progress-bar {
+            transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+    </style>
+</head>
+<body class="adventure-bg min-h-screen flex flex-col items-center p-6 md:p-12">
+
+    <header class="w-full max-w-5xl mb-14 text-center">
+        <div class="inline-flex items-center gap-3 bg-slate-800 border border-slate-600 px-5 py-2 rounded-full mb-8 shadow-lg">
+            <span class="w-3 h-3 bg-amber-400 rounded-full animate-pulse shadow-[0_0_10px_rgba(251,191,36,0.8)]"></span>
+            <span class="text-sm font-bold tracking-widest text-slate-200">數位素養情境模擬器</span>
+        </div>
+        <!-- 字級提升：text-4xl -> text-5xl md:text-6xl -->
+        <h1 class="text-5xl md:text-6xl font-black text-white mb-6 tracking-tight drop-shadow-lg">
+            真相<span class="text-amber-400">迷宮</span>
+        </h1>
+        <p class="text-slate-300 text-xl max-w-2xl mx-auto font-medium">
+            當資訊的界線變得模糊，你的每一個抉擇，都將引發不可逆的連鎖反應。
+        </p>
+    </header>
+
+    <main id="game-container" class="w-full max-w-5xl">
+        
+        <!-- STAGE 1: 角色選擇 -->
+        <section id="character-selection" class="scene-entry" style="display: block;">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="card-box p-10 rounded-3xl cursor-pointer group flex flex-col items-center text-center" onclick="startGame('platform')">
+                    <!-- 圖標放大 -->
+                    <div class="text-6xl mb-8 group-hover:scale-110 group-hover:rotate-6 transition-transform drop-shadow-md">📦</div>
+                    <h2 class="text-2xl font-bold text-sky-400 mb-4">網拍小老闆</h2>
+                    <!-- 字級提升 -->
+                    <p class="text-slate-200 text-base font-medium">
+                        面對庫存壓力與商業利益，誠信是否能成為你的護城河？
+                    </p>
+                </div>
+
+                <div class="card-box p-10 rounded-3xl cursor-pointer group flex flex-col items-center text-center" onclick="startGame('promoter')">
+                    <div class="text-6xl mb-8 group-hover:scale-110 group-hover:rotate-6 transition-transform drop-shadow-md">🎬</div>
+                    <h2 class="text-2xl font-bold text-purple-400 mb-4">影片大導演</h2>
+                    <p class="text-slate-200 text-base font-medium">
+                        掌握流量的同時，你是否察覺自己正步入數位詐騙的灰色地帶？
+                    </p>
+                </div>
+
+                <div class="card-box p-10 rounded-3xl cursor-pointer group flex flex-col items-center text-center" onclick="startGame('influencer')">
+                    <div class="text-6xl mb-8 group-hover:scale-110 group-hover:rotate-6 transition-transform drop-shadow-md">📸</div>
+                    <h2 class="text-2xl font-bold text-pink-400 mb-4">超級網紅</h2>
+                    <p class="text-slate-200 text-base font-medium">
+                        當隱私成為勒索籌碼，你該如何奪回屬於自己的話語權？
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- STAGE 2-5: 遊戲主場景 -->
+        <section id="game-scene" class="scene-entry" style="display: none;">
+            <div class="card-box p-10 md:p-16 rounded-[2.5rem] relative overflow-hidden">
+                <!-- 進度條加厚並加入光暈 -->
+                <div class="absolute top-0 left-0 w-full h-2.5 bg-slate-800">
+                    <div id="progress-inner" class="h-full bg-amber-400 progress-bar shadow-[0_0_15px_rgba(251,191,36,0.8)]" style="width: 0%"></div>
+                </div>
+                
+                <div class="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-6 mt-4">
+                    <div class="flex items-center space-x-5">
+                        <span id="role-badge" class="px-4 py-1.5 rounded-xl text-sm font-bold bg-white text-slate-900 tracking-wider shadow-sm">角色</span>
+                        <h3 id="scene-title" class="text-2xl font-bold text-amber-400">事件標題</h3>
+                    </div>
+                    <span id="scene-indicator" class="text-slate-400 font-mono text-base font-bold tracking-widest">STAGE 1/6</span>
+                </div>
+
+                <div class="mb-12 min-h-[120px]">
+                    <!-- 劇情內文字級大幅提升 -->
+                    <p id="story-text" class="text-xl md:text-3xl text-white font-bold leading-snug drop-shadow-sm"></p>
+                </div>
+                
+                <div class="bg-sky-500/10 border-l-4 border-sky-400 p-6 rounded-r-2xl mb-12 flex items-start gap-5">
+                    <div class="text-2xl drop-shadow-md">💡</div>
+                    <div>
+                        <h4 class="font-bold text-sky-400 mb-2 text-sm tracking-widest uppercase">識讀情境分析</h4>
+                        <!-- Tip 字級提升 -->
+                        <p id="tip-text" class="text-base text-slate-200 font-medium"></p>
+                    </div>
+                </div>
+
+                <div id="options-container" class="flex flex-col gap-5">
+                    <!-- 動態按鈕 -->
+                </div>
+            </div>
+        </section>
+
+        <!-- STAGE 6: 結局畫面 -->
+        <section id="ending-screen" class="scene-entry text-center" style="display: none;">
+            <div class="max-w-4xl mx-auto">
+                <div class="mb-10 inline-block p-6 bg-amber-400 rounded-3xl text-slate-900 shadow-[0_10px_20px_rgba(251,191,36,0.3)]">
+                    <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </div>
+                <!-- 結局標題提升 -->
+                <h1 id="ending-title" class="text-4xl md:text-5xl font-black text-white mb-10 tracking-tight drop-shadow-lg">結局標題</h1>
+                
+                <div class="card-box p-10 md:p-16 rounded-[3rem] text-left mb-12">
+                    <p id="ending-text" class="text-xl md:text-2xl mb-12 text-slate-100 font-bold leading-relaxed"></p>
+                    
+                    <div class="bg-indigo-500/15 p-8 rounded-3xl border border-indigo-400/30 shadow-inner">
+                        <h3 class="font-black text-xl text-indigo-300 mb-4 flex items-center">
+                            <span class="mr-4 text-2xl">🎓</span> 媒體識讀反思
+                        </h3>
+                        <p id="reflection-text" class="text-slate-200 text-lg font-medium leading-relaxed"></p>
+                    </div>
+                </div>
+                
+                <button onclick="restartGame()" class="bg-white hover:bg-amber-400 text-slate-900 py-5 px-12 rounded-2xl text-xl font-bold transition-all shadow-xl hover:scale-105 active:scale-95">
+                    重新進行情境模擬 🚀
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="mt-20 mb-10 text-slate-500 text-sm font-bold tracking-[0.2em] uppercase text-center">
+        © 2026 教學情境模擬 · 數位素養系列
+    </footer>
+
+<script>
+/** * 音效處理模組 (Web Audio API)
+ * 完全原生，不需外部檔案，產生清脆的 UI 點擊聲
+ */
+let audioCtx;
+
+function initAudio() {
+    if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+    }
+}
+
+function playClickSound() {
+    try {
+        initAudio();
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+
+        // 設定波形與頻率 (輕快的音調)
+        oscillator.type = 'sine';
+        oscillator.frequency.setValueAtTime(800, audioCtx.currentTime);
+        oscillator.frequency.exponentialRampToValueAtTime(300, audioCtx.currentTime + 0.1);
+
+        // 設定音量衰減 (快速的 Pop 聲)
+        gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+
+        oscillator.start();
+        oscillator.stop(audioCtx.currentTime + 0.1);
+    } catch (e) {
+        console.log("Audio not supported or blocked by browser.");
+    }
+}
+
+
+/** * 遊戲資料庫 - 完整 6 階段決策網絡 
+ */
+const gameData = {
+    // 【角色 1：網拍小老闆】
+    platform: {
+        name: '網拍小老闆',
+        scenes: {
+            c1_s2: { 
+                title: '瑕疵的誘惑',
+                text: '你剛代理的一批水壺有強烈的塑膠異味。這筆貨款佔了你多數積蓄，如果不賣掉將面臨資金斷鏈。你會如何處理？',
+                tip: '網路行銷常利用「產地標籤」掩飾品質瑕疵。初期的決策將決定品牌長遠的數位商譽走向。',
+                options: [
+                    { text: '將商品重新包裝，以「限量盲盒」的形式在社群販售。', next: 'c1_s3_a' },
+                    { text: '購買五星好評服務，用大量的正面評價蓋過潛在爭議。', next: 'c1_s3_b' },
+                    { text: '主動標示商品瑕疵，並以成本價五折進行出清。', next: 'c1_s3_c' }
+                ]
+            },
+            c1_s3_a: { 
+                title: '資訊落差的代價',
+                text: '盲盒策略成功清空庫存。但一位學生傳訊表示，這是她存錢買給家人的禮物，收到卻是劣質品，感到非常難過。',
+                tip: '盲盒本質上是利用資訊不對稱來轉嫁風險。當商業手段面對真實的消費者反饋時，道德壓力便會浮現。',
+                options: [
+                    { text: '私下聯繫該名學生，免費補寄一個高價位商品。', next: 'c1_s4_a' },
+                    { text: '不予理會，盲盒本來就具有隨機性與風險。', next: 'c1_s4_b' },
+                    { text: '發佈公開聲明致歉，並開放所有盲盒買家退貨。', next: 'c1_s4_c' }
+                ]
+            },
+            c1_s3_b: { 
+                title: '失控的口碑',
+                text: '假評價讓商品完售，但網軍公司卻威脅你，如果不支付「後續維護費」，他們就會發動機器人留下大量惡意負評。',
+                tip: '造假評價不僅觸犯公平交易法，更會讓你受制於非法產業鏈，失去對自身品牌的控制權。',
+                options: [
+                    { text: '支付維護費，希望花錢消災盡快平息此事。', next: 'c1_s4_b' },
+                    { text: '拒絕付款，並向網路警察報案尋求協助。', next: 'c1_s4_c' },
+                    { text: '在社群平台上發文，反向指控遭到同業惡意攻擊。', next: 'c1_s4_a' }
+                ]
+            },
+            c1_s3_c: { 
+                title: '庫存與壓力的交迫',
+                text: '誠實標示導致無人問津，你的資金即將見底，房租也快付不出來了。這時，一位專門拆解劣質品的 YouTuber 想跟你合作。',
+                tip: '誠實有時會帶來短期的生存危機，但在資訊透明的時代，這份真實也可能成為意想不到的轉機。',
+                options: [
+                    { text: '拒絕合作，避免商品品質問題被進一步放大。', next: 'c1_s4_b' },
+                    { text: '答應合作，並在影片中詳細揭露上游廠商的問題。', next: 'c1_s4_c' },
+                    { text: '向高利貸借款周轉，試圖撐過這段低谷期。', next: 'c1_s4_a' }
+                ]
+            },
+            c1_s4_a: { 
+                title: '極端效應的引爆',
+                text: '你的處理方式在網路上引發了強烈的連鎖反應。爭議擴大，出現了許多真假參半的抹黑文，賣場信譽搖搖欲墜。',
+                tip: '在數位環境中，迴避問題或情緒化的反擊，往往會引發「炎上效應」，讓焦點從事件本身轉移到你的態度。',
+                options: [
+                    { text: '委託律師發布強硬聲明，揚言提告所有造謠者。', next: 'c1_s5_a' },
+                    { text: '暫時關閉所有賣場與社群帳號，等待風波過去。', next: 'c1_s5_b' },
+                    { text: '開設直播，不設防地與網友進行問答與說明。', next: 'c1_s5_c' }
+                ]
+            },
+            c1_s4_b: { 
+                title: '公權力與調查',
+                text: '事件引起了主管機關的注意。消保官介入調查，要求你提供完整的進銷存紀錄與廣告投放明細。',
+                tip: '面對公權力審查，數位足跡（如網軍交易紀錄）是無法隱藏的。坦承面對是降低法律風險的最佳策略。',
+                options: [
+                    { text: '試圖隱藏部分敏感對話紀錄，以減輕可能的罰則。', next: 'c1_s5_a' },
+                    { text: '全面配合調查，交出所有資料並接受行政裁罰。', next: 'c1_s5_b' },
+                    { text: '聘請律師團隊，針對法規模糊地帶進行辯護。', next: 'c1_s5_c' }
+                ]
+            },
+            c1_s4_c: { 
+                title: '意料之外的轉機',
+                text: '你的決定意外獲得了部分群眾與媒體的正面肯定，品牌討論度大增，甚至有投資人主動聯繫表達興趣。',
+                tip: '危機中的透明度與社會責任感，能轉化為強大的「信任資產」，這也是媒體識讀教育所強調的核心價值。',
+                options: [
+                    { text: '趁著高討論度，快速調漲其他商品價格以彌補虧損。', next: 'c1_s5_a' },
+                    { text: '拒絕外部投資，堅持以目前的步調穩健經營。', next: 'c1_s5_b' },
+                    { text: '接受投資，並利用資源轉型為注重環保與誠信的品牌。', next: 'c1_s5_c' }
+                ]
+            },
+            c1_s5_a: { 
+                title: '信任的崩解與重建',
+                text: '強硬與取巧的手段讓你身心俱疲。資金消耗殆盡，合作夥伴也因為持續的負面觀感而紛紛求去。你來到了十字路口。',
+                tip: '數位商譽的建立需要數年，摧毀卻只需幾天。依賴資訊落差的商業模式，終將面臨市場的反噬。',
+                options: [
+                    { text: '宣布破產結業，從此退出電子商務領域。', next: 'end_c1_1' },
+                    { text: '換個名字另起爐灶，試圖複製過去的賺錢模式。', next: 'end_c1_2' },
+                    { text: '認真反省，將這次失敗寫成案例分享給其他創業者。', next: 'end_c1_3' }
+                ]
+            },
+            c1_s5_b: { 
+                title: '沉澱後的抉擇',
+                text: '風波逐漸平息。雖然你付出了代價，但也看清了網路世界的運作規則。面對未來的職涯，你決定：',
+                tip: '承擔後果是成熟的表現。將錯誤的經驗轉化為對數位環境的正確認知，是跌倒後最大的收穫。',
+                options: [
+                    { text: '回歸平凡的上班族生活，遠離網路創業的喧囂。', next: 'end_c1_1' },
+                    { text: '成為電商顧問，專門教導如何利用法規漏洞。', next: 'end_c1_2' },
+                    { text: '重新開始小規模網拍，這次堅持百分之百透明。', next: 'end_c1_3' }
+                ]
+            },
+            c1_s5_c: { 
+                title: '資本與初心的拉扯',
+                text: '隨著資源的湧入，你的事業準備起飛。但投資方要求你未來必須配合進行「誇大不實」的行銷策略以達到業績目標。',
+                tip: '當利益與誠信發生衝突時，你的選擇將決定你最終成為什麼樣的企業家。',
+                options: [
+                    { text: '拿著投資方的錢套現退場，將品牌拱手讓人。', next: 'end_c1_1' },
+                    { text: '妥協於資本，同意採用具爭議性的行銷手法。', next: 'end_c1_2' },
+                    { text: '拒絕不合理要求，堅持以真實品質面對消費者。', next: 'end_c1_3' }
+                ]
+            }
+        }
+    },
+
+    // 【角色 2：影片大導演】
+    promoter: {
+        name: '影片大導演',
+        scenes: {
+            c2_s2: {
+                title: '暗藏玄機的合約',
+                text: '一家海外公司開出高於市價十倍的酬勞，請你剪輯一支「保證獲利」的投資APP廣告，並要求以你的名義發布。',
+                tip: '高額報酬且要求借用名氣發布，通常是詐騙集團尋找「數位車手」或設置防火牆的慣用手法。',
+                options: [
+                    { text: '立刻簽約接案，認為自己只是提供後製服務。', next: 'c2_s3_a' },
+                    { text: '將案子轉介給缺錢的同行，自己從中抽取介紹費。', next: 'c2_s3_b' },
+                    { text: '察覺有異，拒絕合作並向防詐騙平台通報。', next: 'c2_s3_c' }
+                ]
+            },
+            c2_s3_a: {
+                title: '流量背後的受害者',
+                text: '廣告大獲成功，但你發現身邊的親友因為看了你的推薦而受騙，投入了大量資金無法拿回。',
+                tip: '虛假資訊的傷害不會只停留在網路上，它會真實地摧毀受害者的人生，甚至是你的親友圈。',
+                options: [
+                    { text: '對親友隱瞞自己就是廣告製作者的事實。', next: 'c2_s4_a' },
+                    { text: '私下拿出一部分酬勞賠償親友，要求他們保密。', next: 'c2_s4_b' },
+                    { text: '向親友坦承並道歉，承諾會協助報警處理。', next: 'c2_s4_c' }
+                ]
+            },
+            c2_s3_b: {
+                title: '轉包的連帶責任',
+                text: '接案的同行拿不到尾款，反過來控告你詐欺。同時警方也循線找到了作為「介紹人」的你。',
+                tip: '在法律實務中，協助媒介詐騙業務同樣可能被視為共犯結構的一環，切勿抱持僥倖心態。',
+                options: [
+                    { text: '在網路上與同行互罵，互相推卸責任。', next: 'c2_s4_a' },
+                    { text: '向警方辯稱自己只是單純介紹，完全不知情。', next: 'c2_s4_b' },
+                    { text: '交出所有與海外公司的聯絡紀錄，協助調查。', next: 'c2_s4_c' }
+                ]
+            },
+            c2_s3_c: {
+                title: '檢舉後的報復',
+                text: '你通報後，詐騙集團駭入你的工作電腦，將你所有未備份的影片素材加密，並勒索高額贖金。',
+                tip: '對抗惡意勢力時，資訊安全是第一道防線。定期備份與尋求專業資安協助是基本素養。',
+                options: [
+                    { text: '為了救回素材，妥協支付贖金。', next: 'c2_s4_a' },
+                    { text: '認賠放棄檔案，重新開始拍攝工作。', next: 'c2_s4_b' },
+                    { text: '尋求專業資安專家與警政署科技犯罪防制中心協助。', next: 'c2_s4_c' }
+                ]
+            },
+            c2_s4_a: {
+                title: '失控的局勢',
+                text: '錯誤的決定讓局勢進一步惡化。你的名聲在業界受損，案源大幅減少，且面臨難以承受的賠償壓力。',
+                tip: '在危機中試圖掩蓋真相或向惡意妥協，只會讓自己陷入更深的泥淖，甚至成為待宰的羔羊。',
+                options: [
+                    { text: '關閉工作室，逃避所有聯絡。', next: 'c2_s5_a' },
+                    { text: '試圖接更多有爭議的高薪案子來填補虧損。', next: 'c2_s5_b' },
+                    { text: '向家人坦白一切，尋求經濟與心理上的支援。', next: 'c2_s5_c' }
+                ]
+            },
+            c2_s4_b: {
+                title: '司法的交叉檢驗',
+                text: '案件進入司法程序。檢察官要求你詳細交代金流與合約細節，而媒體也開始在法院外守候。',
+                tip: '司法程序的透明度是對抗謠言的利器，但同時也考驗當事人面對過錯的誠實度與勇氣。',
+                options: [
+                    { text: '在媒體前哭訴自己是完全無辜的受害者。', next: 'c2_s5_a' },
+                    { text: '聽從律師建議，在法庭上行使緘默權。', next: 'c2_s5_b' },
+                    { text: '在法庭上誠實還原過程，轉為汙點證人。', next: 'c2_s5_c' }
+                ]
+            },
+            c2_s4_c: {
+                title: '真相的解構',
+                text: '你選擇正面迎擊，透過你擅長的影像技術，開始分析並解構這類詐騙廣告的手法與破綻。',
+                tip: '具備媒體製作能力的人，若能將其用於「解碼」媒體操弄，將能發揮巨大的社會影響力。',
+                options: [
+                    { text: '製作帶有強烈情緒煽動的反擊影片。', next: 'c2_s5_a' },
+                    { text: '製作客觀理性的詐騙手法分析紀錄片。', next: 'c2_s5_b' },
+                    { text: '與執法單位合作，協助拍攝官方防詐宣導片。', next: 'c2_s5_c' }
+                ]
+            },
+            c2_s5_a: {
+                title: '輿論的反噬',
+                text: '逃避或情緒化的處理方式，讓你成為網路論壇公審的對象。你的數位足跡被徹底放大檢視。',
+                tip: '網路輿論往往缺乏邊界。當失去信任基礎時，任何解釋都可能被解讀為狡辯。',
+                options: [
+                    { text: '徹底退出網路世界，不再使用社群媒體。', next: 'end_c2_1' },
+                    { text: '創立分身帳號，在論壇上與網友互罵。', next: 'end_c2_2' },
+                    { text: '冷靜接受批評，用時間與改變來證明自己。', next: 'end_c2_3' }
+                ]
+            },
+            c2_s5_b: {
+                title: '代價與重生',
+                text: '雖然免除了最重的刑責，但你面臨巨額的罰款與長期的緩刑。你的創作生涯被迫按下暫停鍵。',
+                tip: '法律底線是不容跨越的。為錯誤付出代價是重建人生的必經之路。',
+                options: [
+                    { text: '自暴自棄，認為人生已經沒有希望。', next: 'end_c2_1' },
+                    { text: '利用這段時間進修法律與資訊安全知識。', next: 'end_c2_2' },
+                    { text: '到偏鄉小學擔任志工，教導學童媒體識讀。', next: 'end_c2_3' }
+                ]
+            },
+            c2_s5_c: {
+                title: '影響力的轉移',
+                text: '你的專業與勇氣獲得了認可。反詐組織邀請你成為專任影像總監，這是一份收入不高但意義深遠的工作。',
+                tip: '影響力本身是中立的。選擇將影響力用於何處，決定了創作者的最終價值。',
+                options: [
+                    { text: '婉拒邀請，認為自己不適合公益領域。', next: 'end_c2_1' },
+                    { text: '接下職務，但暗中利用職務之便接私案。', next: 'end_c2_2' },
+                    { text: '全力投入，致力於提升大眾的數位防禦力。', next: 'end_c2_3' }
+                ]
+            }
+        }
+    },
+
+    // 【角色 3：超級網紅】
+    influencer: {
+        name: '超級網紅',
+        scenes: {
+            c3_s2: {
+                title: '陰暗處的要脅',
+                text: '你收到一封匿名信件，內含你成名前的未修飾照片與爭議發言紀錄。對方勒索高額加密貨幣，否則公開。',
+                tip: '面對數位勒索，支付贖金往往是無底洞的開始。勒索者利用的是受害者對形象受損的恐懼。',
+                options: [
+                    { text: '害怕失去代言，選擇悄悄支付贖金。', next: 'c3_s3_a' },
+                    { text: '假裝沒看到，直接封鎖該匿名帳號。', next: 'c3_s3_b' },
+                    { text: '搶在對方發布前，主動公開並講述過去的經歷。', next: 'c3_s3_c' }
+                ]
+            },
+            c3_s3_a: {
+                title: '貪婪的鎖鏈',
+                text: '付錢後，對方不僅沒有刪除資料，反而利用 AI Deepfake 技術，將你的臉合成到不雅影片上進行二次勒索。',
+                tip: 'Deepfake 技術降低了造假門檻。面對升級的數位暴力，獨自承受只會讓情況惡化。',
+                options: [
+                    { text: '精神瀕臨崩潰，準備籌措更多資金支付。', next: 'c3_s4_a' },
+                    { text: '向經紀公司坦白，由公司法務介入處理。', next: 'c3_s4_b' },
+                    { text: '在私人小帳發文抱怨，結果截圖被外流。', next: 'c3_s4_c' }
+                ]
+            },
+            c3_s3_b: {
+                title: '失控的謠言',
+                text: '被封鎖的勒索者將資料與合成的假影片散布到各大論壇，輿論瞬間譁然，許多不理智的網友湧入你的版面攻擊。',
+                tip: '在後真相時代，煽動性的假訊息傳播速度遠快於澄清。冷靜的應對與證據保全是關鍵。',
+                options: [
+                    { text: '與網友對罵，情緒化地反駁所有指控。', next: 'c3_s4_a' },
+                    { text: '報警並尋求資安專家進行影片造假鑑定。', next: 'c3_s4_b' },
+                    { text: '發布簡單的澄清聲明後，停止更新社群。', next: 'c3_s4_c' }
+                ]
+            },
+            c3_s3_c: {
+                title: '真實的震盪',
+                text: '主動公開過去雖然掌握了話語權，但也引起了粉絲的兩極反應。部分保守的品牌商提出解約要求。',
+                tip: '打破完美人設需要極大的勇氣。真實的呈現或許會流失部分利益，卻能篩選出更穩固的社群連結。',
+                options: [
+                    { text: '不甘示弱，在網路上公開抨擊解約的廠商。', next: 'c3_s4_a' },
+                    { text: '交由法務處理合約問題，專注安撫留下來的粉絲。', next: 'c3_s4_b' },
+                    { text: '舉辦線上見面會，真誠地與粉絲對話交流。', next: 'c3_s4_c' }
+                ]
+            },
+            c3_s4_a: {
+                title: '情緒的深淵',
+                text: '持續的高壓與錯誤應對，讓你的公眾形象跌入谷底。社群平台上出現了大量針對你的惡搞迷因。',
+                tip: '網路霸凌會嚴重侵蝕受害者的心理健康。適時切斷數位連結，尋求專業心理支持是必要的。',
+                options: [
+                    { text: '無限期退出公眾視野，切斷所有社交聯繫。', next: 'c3_s5_a' },
+                    { text: '參加爭議性的實境秀，試圖用黑紅路線翻身。', next: 'c3_s5_b' },
+                    { text: '尋求心理諮商，並暫停所有商業活動。', next: 'c3_s5_c' }
+                ]
+            },
+            c3_s4_b: {
+                title: '法庭外的戰役',
+                text: '雖然進入法律程序並取得了鑑定報告，但造謠者在海外難以追查。假消息依然在封閉的群組中流傳。',
+                tip: '司法有其侷限性與滯後性。重建數位環境的信任，需要持續的社會教育與溝通。',
+                options: [
+                    { text: '感到絕望，認為法律根本無法保護受害者。', next: 'c3_s5_a' },
+                    { text: '將鑑定報告置頂，不再回應任何相關問題。', next: 'c3_s5_b' },
+                    { text: '拍攝紀錄片，公開自己對抗數位暴力的全過程。', next: 'c3_s5_c' }
+                ]
+            },
+            c3_s4_c: {
+                title: '重塑話語權',
+                text: '你選擇正面溝通，許多粉絲被你的真誠打動，甚至發起了支持你的網路活動。你的影響力開始產生質變。',
+                tip: '公眾人物的危機處理，若能昇華為對社會議題的探討，將能帶來深遠的正面影響。',
+                options: [
+                    { text: '將支持度變現，推出周邊商品大賺一筆。', next: 'c3_s5_a' },
+                    { text: '維持現狀，繼續原本的美妝/娛樂內容創作。', next: 'c3_s5_b' },
+                    { text: '成立反數位暴力基金，協助其他受害者。', next: 'c3_s5_c' }
+                ]
+            },
+            c3_s5_a: {
+                title: '迷失與退場',
+                text: '這場風暴耗盡了你對網路的熱情，或者讓你走上了更偏激的道路。你面臨最後的選擇。',
+                tip: '網路環境的極端化容易讓人迷失。無論選擇留下或離開，內心的平靜才是最終的歸宿。',
+                options: [
+                    { text: '徹底消失，過著隱姓埋名的生活。', next: 'end_c3_1' },
+                    { text: '成為靠爭議博取眼球的邊緣創作者。', next: 'end_c3_2' },
+                    { text: '轉居幕後，從事非公眾性質的工作。', next: 'end_c3_3' }
+                ]
+            },
+            c3_s5_b: {
+                title: '疤痕與日常',
+                text: '生活逐漸回歸平靜，雖然偶爾還是會有酸民提及往事，但你已經學會了如何與這些雜音共處。',
+                tip: '培養強大的「心理抗打擊力」，是在數位時代生存的必修課。',
+                options: [
+                    { text: '嚴格審查所有留言，只留下讚美的聲音。', next: 'end_c3_1' },
+                    { text: '把遭遇寫成書，為自己的經歷留下紀錄。', next: 'end_c3_2' },
+                    { text: '學會放下，專注於現實生活中的真實關係。', next: 'end_c3_3' }
+                ]
+            },
+            c3_s5_c: {
+                title: '影響力的昇華',
+                text: '你不再只是一個娛樂大眾的網紅，社會機構邀請你擔任「網路安全大使」，參與政策推動。',
+                tip: '真正的影響力，不在於追蹤數的多少，而在於你能為這個社會帶來多少正向的改變。',
+                options: [
+                    { text: '利用大使頭銜接下更多商業代言。', next: 'end_c3_1' },
+                    { text: '專注於倡議工作，但保持低調不居功。', next: 'end_c3_2' },
+                    { text: '與平台業者合作，推動建立更完善的審核機制。', next: 'end_c3_3' }
+                ]
+            }
+        }
+    }
+};
+
+const endings = {
+    // C1 Endings
+    end_c1_1: { title: '結局：黯然退場', text: '經歷了資金斷鏈與信譽受損，你最終選擇關閉賣場。', reflection: '在數位商務中，依賴資訊落差與造假換來的利潤極其脆弱。失去誠信，就等於失去了在市場生存的根基。' },
+    end_c1_2: { title: '結局：迷失的商人', text: '你或許暫時度過了危機，但你的商業模式已經偏離了正軌，隨時面臨更大的法律風險。', reflection: '妥協於短期的利益與壓力，將使人逐漸喪失道德底線。法網恢恢，心存僥倖往往會付出更慘痛的代價。' },
+    end_c1_3: { title: '結局：重生的實業家', text: '你從失敗中汲取教訓，堅持透明與誠實，最終建立起堅不可摧的品牌護城河。', reflection: '危機即轉機。當你願意承擔責任並保持資訊透明時，這份「誠實資產」將成為你在數位時代最強大的競爭力。' },
+    
+    // C2 Endings
+    end_c2_1: { title: '結局：失落的鏡頭', text: '因為捲入詐騙風波或選擇逃避，你的創作生涯戛然而止，付出了沉重的代價。', reflection: '創作者必須對自己產出的內容負責。盲目接案、忽視查證，最終傷害的不只是受眾，更是自己的職業生命。' },
+    end_c2_2: { title: '結局：司法的救贖', text: '你承擔了應有的法律責任，並在過程中學習到了深刻的教訓，準備重新出發。', reflection: '面對錯誤需要極大的勇氣。透過正當的司法途徑釐清真相，是彌補過錯、重建社會信任的唯一正道。' },
+    end_c2_3: { title: '結局：影像的防護網', text: '你將專業轉化為社會防護網，用影像的力量對抗詐騙，找到了創作的全新價值。', reflection: '媒體素養不僅是「識讀」，更是「產製」。將影響力用於揭露虛假、傳遞真實，是數位創作者的最高價值體現。' },
+    
+    // C3 Endings
+    end_c3_1: { title: '結局：虛榮的囚徒', text: '你被困在維持表面形象的壓力中，或者成為了追逐流量的極端份子，失去了真實的自我。', reflection: '網路上的完美人設往往是不堪一擊的。當個人的價值觀完全被流量與外界眼光綁架時，將失去內心的自由。' },
+    end_c3_2: { title: '結局：堅韌的倖存者', text: '你挺過了風波，學會了如何與數位世界的雜音共處，找回了生活的主導權。', reflection: '面對數位暴力，心理韌性是最後的防線。學會適時切斷網路連結，專注於真實世界的關係，是保護自己的重要法則。' },
+    end_c3_3: { title: '結局：數位平權先驅', text: '你化傷痛為力量，成為推動反數位暴力的重要指標，用自身經歷保護了更多人。', reflection: '最高層次的媒體識讀，是具備改變環境的行動力。你不僅保護了自己，更致力於打造一個更安全的數位社會。' }
+};
+
+// 遊戲狀態控制
+let currentState = { character: null, scene: null };
+
+/** * 切換顯示畫面，徹底使用 style.display 避免 CSS 權重衝突 
+ */
+function switchScreen(id) {
+    const screens = ['character-selection', 'game-scene', 'ending-screen'];
+    screens.forEach(s => {
+        document.getElementById(s).style.display = 'none';
+        document.getElementById(s).classList.remove('scene-entry'); // 重置動畫
+    });
+    
+    const target = document.getElementById(id);
+    target.style.display = 'block';
+    
+    // 強制觸發重繪以重啟 CSS 動畫
+    void target.offsetWidth; 
+    target.classList.add('scene-entry');
+    
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function startGame(characterId) {
+    playClickSound(); // 觸發音效
+    currentState.character = characterId;
+    // Stage 1 為選角，正式開始為 Stage 2 (scene 2)
+    renderScene('c' + (characterId === 'platform' ? '1' : characterId === 'promoter' ? '2' : '3') + '_s2');
+    switchScreen('game-scene');
+}
+
+function renderScene(sceneId) {
+    const charData = gameData[currentState.character];
+    const sceneData = charData.scenes[sceneId];
+    
+    if (!sceneData) {
+        console.error('Missing scene data:', sceneId);
+        return;
+    }
+
+    currentState.scene = sceneId;
+    
+    // 更新文字與介面
+    document.getElementById('role-badge').innerText = charData.name;
+    document.getElementById('scene-title').innerText = sceneData.title;
+    document.getElementById('story-text').innerText = sceneData.text;
+    document.getElementById('tip-text').innerText = sceneData.tip;
+    
+    // 精確計算 6 階段進度 (S1=選角, S2~S5=劇情, S6=結局)
+    let stage = 2;
+    if (sceneId.includes('_s3_')) stage = 3;
+    if (sceneId.includes('_s4_')) stage = 4;
+    if (sceneId.includes('_s5_')) stage = 5;
+    
+    document.getElementById('scene-indicator').innerText = `STAGE ${stage}/6`;
+    document.getElementById('progress-inner').style.width = `${(stage / 6) * 100}%`;
+
+    // 渲染三個無提示的決策按鈕
+    const container = document.getElementById('options-container');
+    container.innerHTML = '';
+    sceneData.options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = "game-button w-full py-5 px-8 rounded-2xl text-left bg-slate-800/90 text-lg md:text-xl font-bold text-slate-100 shadow-lg";
+        btn.innerText = opt.text;
+        btn.onclick = () => {
+            playClickSound(); // 觸發音效
+            if (opt.next.startsWith('end_')) {
+                renderEnding(opt.next);
+            } else {
+                renderScene(opt.next);
+            }
+        };
+        container.appendChild(btn);
+    });
+}
+
+function renderEnding(endingId) {
+    const data = endings[endingId];
+    document.getElementById('ending-title').innerText = data.title;
+    document.getElementById('ending-text').innerText = data.text;
+    document.getElementById('reflection-text').innerText = data.reflection;
+    
+    // 抵達最終階段
+    document.getElementById('scene-indicator') ? document.getElementById('scene-indicator').innerText = 'STAGE 6/6' : null;
+    document.getElementById('progress-inner').style.width = '100%';
+    
+    switchScreen('ending-screen');
+}
+
+function restartGame() {
+    playClickSound(); // 觸發音效
+    currentState = { character: null, scene: null };
+    switchScreen('character-selection');
+}
+
+// 初始啟動
+window.onload = () => {
+    switchScreen('character-selection');
+};
+</script>
+</body>
+</html>
